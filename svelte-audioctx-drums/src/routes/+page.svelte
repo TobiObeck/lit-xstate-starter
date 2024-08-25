@@ -1,11 +1,23 @@
 <script lang="ts">
-	import { appActor } from '$lib/actors/appActor';
+	import { appMachine } from '$lib/actors/appActor';
+	import { browser } from '$app/environment';
+	import { createActor } from 'xstate';
+	import { hang_drum_sounds } from '$lib/const';
 
-	appActor.start();
+	console.log('test', browser);
+	if (browser) {
+		const appActor = createActor(appMachine);
 
-	appActor.subscribe((snapshot) => {
-        console.log(snapshot)
-    });
+		console.log('test', browser);
+		appActor.start();
+
+		appActor.subscribe((snapshot) => {
+			console.log(snapshot)
+		})
+
+		appActor.send({type: 'init'})
+		appActor.send({type: 'loadFiles', audioUrls: hang_drum_sounds})
+	}
 </script>
 
 <h1>Welcome to SvelteKit</h1>
