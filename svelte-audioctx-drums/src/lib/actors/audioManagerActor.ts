@@ -17,8 +17,8 @@ const fetchAudioFile = async (audioFilePath: string) => {
 	return response.arrayBuffer();
 };
 
-export type TAudioPlayerMachine = ActorRefFrom<typeof audioPlayerMachine>;
-export const audioPlayerMachine = setup({
+export type TAudioManagerMachine = ActorRefFrom<typeof audioManagerMachine>;
+export const audioManagerMachine = setup({
 	types: {
 		context: {} as {
 			audioContext: AudioContext | null;
@@ -29,7 +29,6 @@ export const audioPlayerMachine = setup({
 		},
 		events: {} as { type: 'init'; audioUrls: string[]; volume?: number }
 	},
-
 	actions: {
 		initialize: enqueueActions(({ enqueue, context, event }) => {
 			console.log('initialize enque stuff');
@@ -64,7 +63,7 @@ export const audioPlayerMachine = setup({
 	}
 	// actors: {}
 }).createMachine({
-	id: 'appMachine',
+	id: 'audioManager',
 	initial: 'idle',
 	context: {
 		audioContext: null, //new AudioContext(),
