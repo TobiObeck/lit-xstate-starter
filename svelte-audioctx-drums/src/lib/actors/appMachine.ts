@@ -11,8 +11,10 @@ export type PlayableActor = ActorRefFrom<typeof playableAudioFileMachine>;
 export const appMachine = setup({
 	types: {
 		context: {} as {
-			noteToFileMap: Map<number, string>;
-			fileToActorMap: Map<string, PlayableActor>;
+			// noteToFileMap: Map<number, string>;
+			noteToFileMap: { [key: number]: string}
+			// fileToActorMap: Map<string, PlayableActor>;
+			fileToActorMap: { [key: string]: PlayableActor}
 		},
 		events: {} as
 			| {
@@ -33,8 +35,10 @@ export const appMachine = setup({
 	id: 'appMachine',
 	initial: 'idle',
 	context: {
-		fileToActorMap: new Map<string, PlayableActor>([]),
-		noteToFileMap: new Map<number, string>([])
+		// fileToActorMap: new Map<string, PlayableActor>([]),
+		fileToActorMap: {},
+		// noteToFileMap: new Map<number, string>([]),
+		noteToFileMap: {},
 	},
 	states: {
 		idle: {
@@ -56,16 +60,25 @@ export const appMachine = setup({
 						enqueue(
 							assign({
 								fileToActorMap: ({ context, system }) => {
-									return context.fileToActorMap.set(
-										event.noteConfig.audioFilePath,
-										system.get(`playable_${event.noteConfig.audioFilePath}`)
-									);
+									return context.fileToActorMap = {
+										...context.fileToActorMap,
+										[event.noteConfig.audioFilePath]: system.get(`playable_${event.noteConfig.audioFilePath}`)
+									}
+									// return context.fileToActorMap.set(
+									// 	event.noteConfig.audioFilePath,
+									// 	system.get(`playable_${event.noteConfig.audioFilePath}`)
+									// );
 								},
 								noteToFileMap: ({ context }) => {
-									return context.noteToFileMap.set(
-										event.noteConfig.note,
-										event.noteConfig.audioFilePath
-									);
+									return context.noteToFileMap = {
+										...context.noteToFileMap,
+										[event.noteConfig.note]: event.noteConfig.audioFilePath
+									}	
+									
+									// return context.noteToFileMap.set(
+									// 	event.noteConfig.note,
+									// 	event.noteConfig.audioFilePath
+									// );
 								}
 							})
 						);
@@ -75,9 +88,9 @@ export const appMachine = setup({
 					actions: [
 						({ context, event, system }) => {
 							console.log('app play', event.note);
-							const fileName = context.noteToFileMap.get(event.note);
+							const fileName = context.noteToFileMap[event.note] // .get(event.note);
 							if (!fileName) return;
-							const actor = context.fileToActorMap.get(fileName);
+							const actor = context.fileToActorMap[fileName] //.get(fileName);
 							if (!actor) return;
 
 							console.log('playable actor from system', actor.getSnapshot().value);
@@ -89,9 +102,11 @@ export const appMachine = setup({
 					]
 				},
 				finishedLoading: {
-					actions: ({ event }) => {
+					actions: [
+						({ event }) => {
 						console.log('finished loading!', event.actorRef);
 					}
+					]
 				}
 			}
 		}
