@@ -1,37 +1,40 @@
 <script lang="ts">
-	import { appMachine, appMachine2 } from '$lib/actors/appActor';
 	import { browser } from '$app/environment';
 	import { createActor } from 'xstate';
 	import { hang_drum_sounds } from '$lib/const';
+	import { newAppMachine } from '$lib/new_actors/newAppMachine';
 
-	console.log('test', browser);
+	console.log('isBrowser', browser);
 	if (browser) {
-		// const appActor2 = createActor(appMachine2);
+		var app = createActor(newAppMachine);
 
-		// console.log('test', browser);
-		// appActor2.start();
+		app.start();
 
-		// appActor2.subscribe((snapshot) => {
-		// 	console.log(snapshot)
-		// })
+		app.subscribe((snapshot) => {
+			console.log(snapshot.value, snapshot.context);
+		});
 
-		// appActor2.send({type: 'loadSoundFile', audioFilePath: hang_drum_sounds[0]})
+		app.send({
+			type: 'loadSoundFile',
+			noteConfig: {
+				note: 36,
+				audioFilePath: hang_drum_sounds[0]
+			}
+		});
+		app.send({
+			type: 'loadSoundFile',
+			noteConfig: {
+				note: 38,
+				audioFilePath: hang_drum_sounds[1]
+			}
+		});
+	}
 
-
-		// this one is at least loading audio
-		const appActor = createActor(appMachine	);
-
-		console.log('test', browser);
-		appActor.start();
-
-		appActor.subscribe((snapshot) => {
-			console.log(snapshot)
-		})
-
-		appActor.send({type: 'init'})
-		appActor.send({type: 'loadFiles', audioUrls: hang_drum_sounds})
+	const handlePlayClick = ()=> {
+		app.send({ type: 'play', note: 36 });
 	}
 </script>
 
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<button on:click={handlePlayClick}>play</button>

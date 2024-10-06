@@ -1,32 +1,14 @@
-import {
-	setup,
-	createMachine,
-	createActor,
-	assign,
-	spawnChild,
-	sendTo,
-	stopChild,
-	fromPromise
-} from 'xstate';
+import { setup, assign, fromPromise } from 'xstate';
 
-const fetchAudioFile = async (audioFilePath: string) => {
-	console.log('fetch afPath', audioFilePath);
-	const response = await fetch(audioFilePath);
-	return response.arrayBuffer();
-};
-
-export const playableMachine = setup({
+export const playAbleAudioFileMachine = setup({
 	types: {
-		// input: {
-		// 	audioFilePath: string
-		// },
 		context: {} as {
 			audioFilePath: string;
 			file: ArrayBuffer | null;
 			error: any | null;
 		},
 		events: {} as
-			| { type: 'play' }
+			| { type: 'play'; note: number }
 			| { type: 'playAt'; timeStampInSec: number }
 			| { type: 'pause' }
 			| { type: 'stop' }
@@ -34,8 +16,9 @@ export const playableMachine = setup({
 	},
 	actors: {
 		fetchAudio: fromPromise(async ({ input }: { input: { audioFilePath: string } }) => {
-			const sound = await fetchAudioFile(input?.audioFilePath);
-			return sound;
+			console.log('fetch afPath', input.audioFilePath);
+			const response = await fetch(input.audioFilePath);
+			return response.arrayBuffer();
 		})
 	}
 }).createMachine({
@@ -45,10 +28,6 @@ export const playableMachine = setup({
 		audioFilePath: '',
 		file: null,
 		error: null
-		// ({ input }) => {
-		// return
-
-		//{ audioFilePath: input.audioFilePath,}
 	},
 	states: {
 		initial: {
@@ -73,7 +52,12 @@ export const playableMachine = setup({
 				input: ({ context: { audioFilePath } }) => ({ audioFilePath }),
 				onDone: {
 					target: 'ready',
-					actions: assign({ file: ({ event }) => event.output })
+					actions: [
+						({ event }) => {
+							console.log('onDone!', event);
+						},
+						assign({ file: ({ event }) => event.output })
+					]
 				},
 				onError: {
 					target: 'failure',
@@ -84,8 +68,8 @@ export const playableMachine = setup({
 		ready: {
 			on: {
 				play: {
-					actions: () => {
-						console.log('playing');
+					actions: ({ event, context }) => {
+						console.log('playing!!!!', event.note, context.file);
 					}
 				}
 			}
