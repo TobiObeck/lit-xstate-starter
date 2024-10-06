@@ -1,4 +1,13 @@
-import { setup, createMachine, createActor, assign, spawnChild, sendTo, stopChild } from 'xstate';
+import {
+	setup,
+	createMachine,
+	createActor,
+	assign,
+	spawnChild,
+	sendTo,
+	stopChild,
+	enqueueActions
+} from 'xstate';
 import { audioManagerMachine, type TAudioManagerMachine } from './audioManagerActor';
 import { playableMachine } from './playableActor';
 
@@ -27,13 +36,22 @@ export const appMachine2 = setup({
 		idle: {
 			on: {
 				loadSoundFile: {
-					entry: 'spawnPlayableActor',
-					actions: ({ event, self, system }) => {
-						system.get('playable_').send({
-							type: 'loadSoundFile',
-							audioFilePath: event.audioFilePath
+					actions: enqueueActions(({ enqueue, context, event }) => {
+						enqueue('spawnPlayableActor');
+						enqueue(({ event, self, system }) => {
+							system.get('playable_').send({
+								type: 'loadSoundFile',
+								audioFilePath: event.audioFilePath
+							});
 						});
-					}
+					})
+					// entry: 'spawnPlayableActor',
+					// actions: ({ event, self, system }) => {
+					// 	system.get('playable_').send({
+					// 		type: 'loadSoundFile',
+					// 		audioFilePath: event.audioFilePath
+					// 	});
+					// }
 				}
 				// loadSoundFile: {
 				// 	target: 'loading',

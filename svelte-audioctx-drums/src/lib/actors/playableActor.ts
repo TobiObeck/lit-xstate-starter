@@ -54,10 +54,15 @@ export const playableMachine = setup({
 		initial: {
 			on: {
 				loadSoundFile: {
-					target: 'loading'
-					// actions: assign(({ event }) => ({
-					// 	audioFilePath: event.audioFilePath
-					// }))
+					target: 'loading',
+					actions: [
+						() => {
+							console.log('playable actor loadSoundFile');
+						},
+						assign(({ event }) => ({
+							audioFilePath: event.audioFilePath
+						}))
+					]
 				}
 			}
 		},
