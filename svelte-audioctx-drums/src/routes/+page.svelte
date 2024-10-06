@@ -2,9 +2,9 @@
 	import { browser } from '$app/environment';
 	import { createActor } from 'xstate';
 	import { HANG_DRUM_SOUNDS } from '$lib/const';
-	import { appMachine, type NoteMapping } from '$lib/actors/appMachine';
+	import { appMachine, type NoteMapping, type PlayableActor } from '$lib/actors/appMachine';
 
-	$: mappings = [] as NoteMapping[];
+	$: mappings = new Map() as Map<string, PlayableActor>;
 
 	console.log('isBrowser', browser);
 	if (browser) {
@@ -14,7 +14,7 @@
 
 		app.subscribe((snapshot) => {
 			console.log(snapshot.value, snapshot.context);
-			mappings = snapshot.context.noteMappings;
+			mappings = snapshot.context.fileToActorMap;
 		});
 
 		for (let idx = 0; idx < HANG_DRUM_SOUNDS.length; idx++) {
@@ -33,12 +33,10 @@
 	};
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 <button on:click={handlePlayClick}>play</button>
 
-{#each mappings as mapping}
+{#each Array.from(mappings) as mapping}
 	<ul>
-		<li>{mapping.note} - {mapping.actorRef.getSnapshot().value}</li>
+		<li>{mapping[0]} - {mapping[1].getSnapshot().value}</li>
 	</ul>
 {/each}

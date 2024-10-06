@@ -6,10 +6,13 @@ export type NoteMapping = {
 	actorRef: ActorRefFrom<typeof playableAudioFileMachine>;
 };
 
+export type PlayableActor = ActorRefFrom<typeof playableAudioFileMachine>;
+
 export const appMachine = setup({
 	types: {
 		context: {} as {
-			noteMappings: NoteMapping[];
+			noteToFileMap: Map<number, string>;
+			fileToActorMap: Map<string, PlayableActor>;
 		},
 		events: {} as
 			| {
@@ -20,6 +23,7 @@ export const appMachine = setup({
 					};
 			  }
 			| { type: 'play'; note: number }
+			| { type: 'finishedLoading'; actorRef: PlayableActor }
 	},
 	actors: {
 		playableAudioFileMachine
@@ -29,7 +33,8 @@ export const appMachine = setup({
 	id: 'appMachine',
 	initial: 'idle',
 	context: {
-		noteMappings: []
+		fileToActorMap: new Map<string, PlayableActor>([]),
+		noteToFileMap: new Map<number, string>([])
 	},
 	states: {
 		idle: {
@@ -38,11 +43,11 @@ export const appMachine = setup({
 					actions: enqueueActions(({ enqueue, context, event, system }) => {
 						enqueue(
 							spawnChild('playableAudioFileMachine', {
-								systemId: `playable_${event.noteConfig.note}`
+								systemId: `playable_${event.noteConfig.audioFilePath}`
 							})
 						);
 						enqueue(({ event, self, system }) => {
-							system.get(`playable_${event.noteConfig.note}`).send({
+							system.get(`playable_${event.noteConfig.audioFilePath}`).send({
 								type: 'loadSoundFile',
 								audioFilePath: event.noteConfig.audioFilePath
 							});
@@ -50,11 +55,18 @@ export const appMachine = setup({
 
 						enqueue(
 							assign({
-								noteMappings: ({ context, system }) =>
-									context.noteMappings.concat({
-										note: event.noteConfig.note,
-										actorRef: system.get(`playable_${event.noteConfig.note}`)
-									})
+								fileToActorMap: ({ context, system }) => {
+									return context.fileToActorMap.set(
+										event.noteConfig.audioFilePath,
+										system.get(`playable_${event.noteConfig.audioFilePath}`)
+									);
+								},
+								noteToFileMap: ({ context }) => {
+									return context.noteToFileMap.set(
+										event.noteConfig.note,
+										event.noteConfig.audioFilePath
+									);
+								}
 							})
 						);
 					})
@@ -63,15 +75,13 @@ export const appMachine = setup({
 					actions: [
 						({ context, event, system }) => {
 							console.log('app play', event.note);
-							const actor = system.get(`playable_${event.note}`);
+							const fileName = context.noteToFileMap.get(event.note);
+							if (!fileName) return;
+							const actor = context.fileToActorMap.get(fileName);
+							if (!actor) return;
+
 							console.log('playable actor from system', actor.getSnapshot().value);
 							actor.send({
-								type: 'play',
-								note: event.note
-							});
-							const mapping = context.noteMappings.find((mapping) => mapping.note === event.note);
-							console.log('playable actor from context', mapping?.actorRef.getSnapshot().value);
-							mapping?.actorRef.send({
 								type: 'play',
 								note: event.note
 							});
