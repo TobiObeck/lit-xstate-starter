@@ -1,13 +1,15 @@
 import { setup, assign, spawnChild, enqueueActions, type ActorRefFrom } from 'xstate';
 import { playableAudioFileMachine } from './playableAudioFileMachine';
 
+export type NoteMapping = {
+	note: number;
+	actorRef: ActorRefFrom<typeof playableAudioFileMachine>;
+};
+
 export const appMachine = setup({
 	types: {
 		context: {} as {
-			noteMappings: {
-				note: number;
-				actorRef: ActorRefFrom<typeof playableAudioFileMachine>;
-			}[];
+			noteMappings: NoteMapping[];
 		},
 		events: {} as
 			| {
@@ -75,6 +77,11 @@ export const appMachine = setup({
 							});
 						}
 					]
+				},
+				finishedLoading: {
+					actions: ({ event }) => {
+						console.log('finished loading!', event.actorRef);
+					}
 				}
 			}
 		}

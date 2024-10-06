@@ -1,4 +1,4 @@
-import { setup, assign, fromPromise } from 'xstate';
+import { setup, assign, fromPromise, sendParent } from 'xstate';
 
 export const playableAudioFileMachine = setup({
 	types: {
@@ -56,7 +56,8 @@ export const playableAudioFileMachine = setup({
 						({ event }) => {
 							console.log('onDone!', event);
 						},
-						assign({ file: ({ event }) => event.output })
+						assign({ file: ({ event }) => event.output }),
+						sendParent(({ self }) => ({ type: 'finishedLoading', actorRef: self.system }))
 					]
 				},
 				onError: {
