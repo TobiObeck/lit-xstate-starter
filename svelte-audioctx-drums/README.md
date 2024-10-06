@@ -1,3 +1,10 @@
+# XState Actors Hang Drum Example
+
+To Do's:
+
+- [ ] instead of mapping note to sound in app machine. Load and store all sounds (maybe even persist in IndexedDb) in a `Set`. Then have a separate mapping for mapping MIDI note to currently selected/active soundFilePath.
+- [ ] display loading progress of individual sounds.
+
 # create-svelte
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).

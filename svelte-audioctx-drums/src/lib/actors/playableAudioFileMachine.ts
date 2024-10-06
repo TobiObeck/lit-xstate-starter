@@ -1,6 +1,6 @@
 import { setup, assign, fromPromise } from 'xstate';
 
-export const playAbleAudioFileMachine = setup({
+export const playableAudioFileMachine = setup({
 	types: {
 		context: {} as {
 			audioFilePath: string;

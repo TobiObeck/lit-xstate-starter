@@ -2,11 +2,11 @@
 	import { browser } from '$app/environment';
 	import { createActor } from 'xstate';
 	import { hang_drum_sounds } from '$lib/const';
-	import { newAppMachine } from '$lib/new_actors/newAppMachine';
+	import { appMachine } from '$lib/actors/appMachine';
 
 	console.log('isBrowser', browser);
 	if (browser) {
-		var app = createActor(newAppMachine);
+		var app = createActor(appMachine);
 
 		app.start();
 
@@ -30,9 +30,9 @@
 		});
 	}
 
-	const handlePlayClick = ()=> {
+	const handlePlayClick = () => {
 		app.send({ type: 'play', note: 36 });
-	}
+	};
 </script>
 
 <h1>Welcome to SvelteKit</h1>

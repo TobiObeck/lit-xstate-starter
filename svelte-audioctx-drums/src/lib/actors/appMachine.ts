@@ -1,12 +1,12 @@
 import { setup, assign, spawnChild, enqueueActions, type ActorRefFrom } from 'xstate';
-import { playAbleAudioFileMachine } from './playableAudioFileMachine';
+import { playableAudioFileMachine } from './playableAudioFileMachine';
 
-export const newAppMachine = setup({
+export const appMachine = setup({
 	types: {
 		context: {} as {
 			noteMappings: {
 				note: number;
-				actorRef: ActorRefFrom<typeof playAbleAudioFileMachine>;
+				actorRef: ActorRefFrom<typeof playableAudioFileMachine>;
 			}[];
 		},
 		events: {} as
@@ -20,7 +20,7 @@ export const newAppMachine = setup({
 			| { type: 'play'; note: number }
 	},
 	actors: {
-		playAbleAudioFileMachine
+		playableAudioFileMachine
 	},
 	actions: {}
 }).createMachine({
@@ -35,7 +35,7 @@ export const newAppMachine = setup({
 				loadSoundFile: {
 					actions: enqueueActions(({ enqueue, context, event, system }) => {
 						enqueue(
-							spawnChild('playAbleAudioFileMachine', {
+							spawnChild('playableAudioFileMachine', {
 								systemId: `playable_${event.noteConfig.note}`
 							})
 						);
