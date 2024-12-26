@@ -1,16 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- encodeURIComponent('🔥') => favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%A5</text></svg>">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%A5</text></svg>"
+    />
     <title>Lit HTML</title>
 
+    <!-- https://shoelace.style/ web components similar to MUI   -->
+    <!-- Web Components Will Outlive Your JavaScript Framework https://jakelazaroff.com/words/web-components-will-outlive-your-javascript-framework/ -->
+    <!--
+        For optimizing load time, cherry picking individual components (from the CDN or npm) is possible
+        https://shoelace.style/getting-started/installation#cherry-picking
+    -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/themes/light.css"
+    />
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace-autoloader.js"
+    ></script>
+    <link rel="stylesheet" href="./custom_shoelace_stuff/custom_shoelace_styles.css"></style>
+    <script type="module" src="./custom_shoelace_stuff/example_event_and_props.js"></script>
+  
+
     <script type="module" src="./src/app.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <noscript>bro why u no javascript??!</noscript>
     <div id="root"></div>
-</body>
+
+    <sl-divider style="--color: cyan"></sl-divider>
+
+    <sl-switch checked>Switch</sl-switch>
+    <sl-button>Click me</sl-button>
+  </body>
 </html>
