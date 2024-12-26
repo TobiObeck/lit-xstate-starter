@@ -15,13 +15,15 @@ export const playableAudioFileMachine = setup({
 			| { type: 'stop' }
 			| { type: 'loadSoundFile'; audioFilePath: string }
 			| { type: 'DOWNLOAD_COMPLETE'; result: any }
-			| { type: 'PROGRESS' }
+			| { type: 'PROGRESS', progress: number }
 	},
 	actors: {
 		fetchAudio: fromPromise(async ({ input }: { input: { audioFilePath: string } }) => {
 			console.log('fetch afPath', input.audioFilePath);
 			const response = await fetch(input.audioFilePath);
-			return response.arrayBuffer();
+			const buffer = await response.arrayBuffer()
+			console.log('buffer', buffer)
+			return buffer
 		}),
 		fetchAudioInChunks: fromCallback(
 			({
@@ -35,18 +37,22 @@ export const playableAudioFileMachine = setup({
 					if (!response.body) return;
 					let receivedLength = 0;
 					const contentLength = Number(response.headers.get('Content-Length'));
+					const contentType = response.headers.get('Content-Type') || 'audio/mp3';
 					const reader = response.body.getReader();
+					const chunks: Uint8Array[] = []
 
 					reader
 						.read()
 						// @ts-ignore
-						.then(function processResult(result) {
+						.then(async function processResult(result) {
 							if (result.done) {
-								sendBack({ type: 'DOWNLOAD_COMPLETE', result: result });
+								const buffer = await new Blob(chunks, { type: contentType }).arrayBuffer()
+								sendBack({ type: 'DOWNLOAD_COMPLETE', result: buffer });
 								return;
 							}
 							receivedLength += result.value.length;
 							const progress = (receivedLength / contentLength) * 100;
+							chunks.push(result.value)
 							sendBack({ type: 'PROGRESS', progress });
 
 							// const temp = reader.read().then(processResult);
@@ -93,6 +99,7 @@ export const playableAudioFileMachine = setup({
 		loading: {
 			invoke: {
 				id: 'invokeFile',
+				
 				src: 'fetchAudioInChunks',
 				input: ({ context: { audioFilePath } }) => ({ audioFilePath })
 
@@ -125,7 +132,10 @@ export const playableAudioFileMachine = setup({
 					actions: [
 						({ event }) => {
 							console.log('progress', event);
-						}
+						},
+						assign(({event}) => ({
+							progress: event.progress
+						}))
 					]
 				}
 			}
